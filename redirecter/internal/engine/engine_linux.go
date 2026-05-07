@@ -4,14 +4,27 @@ package engine
 
 import (
 	"fmt"
+
+	"github.com/florianl/go-nfqueue"
 )
 
+
+// linux Potrzebuje  QueueID uint16 pozwala kernelowi rozróżnić, który pakiet wysłać do którego programu.
+
 type LinuxEngine struct {
-	// tutaj dodasz pola dla nfqueue
+	nfq *nfqueue.Nfqueue
 }
 
 func New() (Engine, error) {
-	fmt.Println("Inicjalizacja silnika Linux (NFQUEUE)...")
+fmt.Println("Inicjalizacja silnika Linux (NFQUEUE)...")
+
+	conf := nfqueue.Config{
+		MaxPacketLen: 0xffff, // cały pakietchcemy
+		Copymode: nfqueue.NfQnlCopyPacket,
+
+
+	}
+
 	return &LinuxEngine{}, nil
 }
 
