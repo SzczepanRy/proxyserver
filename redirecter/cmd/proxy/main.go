@@ -3,24 +3,40 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"redirecter/internal/engine"
 	"redirecter/internal/packet"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	fmt.Println("main started")
 
 	e, err := engine.New()
 	if err != nil {
 		log.Fatalf("error loading Engine: %v", err)
 	}
 
+	err = godotenv.Load()
+	if err != nil {
+		log.Fatal("Błąd ładowania pliku .env")
+	}
+
+	ipBytes , portBytes , err := packet.LoadEnv()
+
+	if err != nil {
+		log.Fatalf("Błąd ładowania zmiennych pliku .env : %v" , err)
+	}
+
 	for {
 		pac, err := e.Listen()
+
 		if err != nil {
-			fmt.Errorf("main loop listiner error %v", err)
+			log.Printf("main loop listiner error %v", err)
 			break
 		}
+
+		fmt.Fprintf(os.Stderr, ">>> Odebrano pakiet! ID: %v | Rozmiar: %d\n", pac.Context, len(pac.Data))
 
 		parsed, err := packet.Parse(&pac)
 		if err != nil {
