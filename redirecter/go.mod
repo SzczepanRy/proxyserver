@@ -4,6 +4,7 @@ go 1.25.7
 
 require (
 	github.com/florianl/go-nfqueue v1.3.2
+	github.com/google/gopacket v1.1.19
 	github.com/imgk/divert-go v0.1.0
 	github.com/joho/godotenv v1.5.1
 	github.com/mdlayher/netlink v1.6.0

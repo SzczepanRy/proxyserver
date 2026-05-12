@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"redirecter/internal/engine"
 	"redirecter/internal/packet"
 
@@ -22,10 +21,10 @@ func main() {
 		log.Fatal("Błąd ładowania pliku .env")
 	}
 
-	ipBytes , portBytes , err := packet.LoadEnv()
+	ipBytes, portBytes, err := packet.LoadEnv()
 
 	if err != nil {
-		log.Fatalf("Błąd ładowania zmiennych pliku .env : %v" , err)
+		log.Fatalf("Błąd ładowania zmiennych pliku .env : %v", err)
 	}
 
 	for {
@@ -36,23 +35,42 @@ func main() {
 			break
 		}
 
-		fmt.Fprintf(os.Stderr, ">>> Odebrano pakiet! ID: %v | Rozmiar: %d\n", pac.Context, len(pac.Data))
+		// czysto kosmetyczne
 
 		parsed, err := packet.Parse(&pac)
 		if err != nil {
-			fmt.Printf("error parsing packet")
+			fmt.Printf("error parsing packet : %v" , err )
 		}
 
-		fmt.Printf("Source: %v, Dest: %v", parsed.Source, parsed.Dest)
 		if parsed.TCP != nil {
-			fmt.Printf(" | TCP Ports: %v -> %v", parsed.TCP.SourcePort, parsed.TCP.DestPort)
+			fmt.Printf("Source: %v, Dest: %v", parsed.Source, parsed.Dest)
+			fmt.Printf(" | TCP Ports: %v -> %v  \n ", parsed.TCP.SourcePort, parsed.TCP.DestPort)
 		}
-		fmt.Println()
-
-		err = e.Send(pac)
+		// end
+		np, err := packet.Modify(&pac, ipBytes, portBytes)
 
 		if err != nil {
-			log.Printf("błąd wysyłania %v ", err)
+			log.Fatalf("could not Modify packet : %v ", err)
+		}
+
+
+		parsed, err = packet.Parse(np)
+		if err != nil {
+			fmt.Printf("error parsing packet : %v" , err )
+		}
+
+		if parsed.TCP != nil {
+			fmt.Printf("Source: %v, Dest: %v", parsed.Source, parsed.Dest)
+			fmt.Printf(" | TCP Ports: %v -> %v  \n ", parsed.TCP.SourcePort, parsed.TCP.DestPort)
+		}
+
+
+
+		if np != nil {
+			err = e.Send(*np)
+			if err != nil {
+				log.Printf("błąd wysyłania %v ", err)
+			}
 		}
 
 	}
