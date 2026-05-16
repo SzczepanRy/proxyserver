@@ -80,13 +80,14 @@ func Modify(p *engine.Packet, ipBytes []byte, portBytes []byte) (*engine.Packet,
 	oldDestPort := make([]byte, 2)
 	binary.BigEndian.PutUint16(oldDestPort, uint16(tcp.DstPort))
 
-	marker := append(oldDestIP, oldDestPort...)
-
 	ip.DstIP = net.IP(ipBytes)
 	tcp.DstPort = layers.TCPPort(binary.BigEndian.Uint16(portBytes))
 
-	// Dodajemy 6 bajtów na początku istniejących danych
-	tcp.Payload = append(marker, tcp.Payload...)
+	// bardzo ważne Syn y nie maja payloda
+	if !tcp.SYN && len(tcp.Payload) > 0 {
+		marker := append(oldDestIP, oldDestPort...)
+		tcp.Payload = append(marker, tcp.Payload...)
+	}
 
 	// gopacket liczy sumy kontrolne
 	buffer := gopacket.NewSerializeBuffer()
