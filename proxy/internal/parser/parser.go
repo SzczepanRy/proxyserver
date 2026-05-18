@@ -41,6 +41,9 @@ func ModifyConn(conn net.Conn) {
 	if err != nil {
 		log.Printf("Nie udało się połączyć z oryginalnym celem %s: %v\n", originalTarget, err)
 		return
+	}else{
+		log.Printf("Udało się połączyć z oryginalnym celem %s ", originalTarget)
+
 	}
 
 	defer remoteConn.Close()
